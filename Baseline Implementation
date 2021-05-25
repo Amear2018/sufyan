@@ -1,0 +1,86 @@
+“import pandas as pd
+from datetime import datetime,timedelta import numpy as np
+import matplotlib.pyplot as plt”
+
+“import warnings warnings.filterwarnings('ignore')
+Pak_data = pd.read_csv("C:/Users/Snoke/Final Year Project/uk.csv") x=Pak_data.loc[:,['Date']].values
+y=Pak_data.loc[:,['Recovered']].values”
+
+“#Calculating for New Positive Cases per day confirmed=Pak_data["Confirmed"] active_day=[0]*len(confirmed) active_day[0]=confirmed[0]
+for i in range(1,len(confirmed)): active_day[i]=confirmed[i]-confirmed[i-1]
+new_cases= pd.DataFrame(data=active_day, index=None, columns=["Daily_Cases"])”
+
+
+“#Calculating for New Deaths Cases per day deaths=Pak_data["Deaths"] deaths_day=[0]*len(deaths) deaths_day[0]=deaths[0]
+for i in range(1,len(deaths)): deaths_day[i]=deaths[i]-deaths[i-1]
+new_deaths= pd.DataFrame(data=deaths_day, index=None, columns=["Daily_Deaths"])”
+
+“#Calculating for New Recovered Cases per day recovered=Pak_data["Recovered"] recovered_day=[0]*len(recovered) recovered_day[0]=recovered[0]
+for i in range(1,len(recovered)): recovered_day[i]=recovered[i]-recovered[i-1]
+new_recovered=	pd.DataFrame(data=recovered_day,	index=None, columns=["Daily_Recovered"])”
+
+
+“Pak_data = pd.concat([Pak_data,new_cases,new_deaths,new_recovered], axis=1) Pak_data['Date'] = pd.to_datetime(Pak_data['Date'])
+
+Pak_data.head()
+
+variables = Pak_data.columns Pak_data.isnull().sum().loc[variables]
+
+plt.plot(Pak_data['Date'],Pak_data['Daily_Cases']) plt.plot(Pak_data['Date'],Pak_data['Daily_Deaths']) plt.plot(Pak_data['Date'],Pak_data['Daily_Recovered']
+
+dates= Pak_data.Date.keys()
+Pak_data['Date'] = np.array([i for i in range(len(dates))]).reshape(-1,1)”
+
+
+“train = Pak_data[Pak_data.index < 280] test = Pak_data[Pak_data.index >= 280]
+
+x_train = train[["Date"]].values y_train = train["Recovered"].values x_test = test[["Date"]].values y_test = test["Recovered"].values
+regressor=LinearRegression() regressor.fit(x_train,y_train) l_pred_pak_r=regressor.predict(x_test)”
+
+“linear_a=explained_variance_score(y_test, l_pred_pak_r) linear_a=linear_a*100
+linear_a
+
+linear_e=mean_absolute_error(y_test, l_pred_pak_r) linear_e
+
+poly=PolynomialFeatures(degree=2) x_poly=poly.fit_transform(x_train) reg=LinearRegression() reg.fit(x_poly,y_train)
+p_pred_pak_r=reg.predict(poly.fit_transform(x_test))
+ 
+poly_a=explained_variance_score(y_test, p_pred_pak_r) poly_a=poly_a*100
+poly_a
+
+poly_e=mean_absolute_error(y_test, p_pred_pak_r) poly_e”
+
+“error=[]
+for k in range(1,50): knn=KNeighborsRegressor(n_neighbors=k) y_pred=cross_val_predict(knn,x_train,y_train,cv=5) error.append(mean_absolute_error(y_train,y_pred))
+
+plt.plot(range(1,50),error)
+
+
+knn= KNeighborsRegressor(n_neighbors=5) knn.fit(x_train,y_train)
+knn_pred_pak_r = knn.predict(x_test)”
+
+“knn_a=explained_variance_score(y_test,knn_pred_pak_r) knn_a=knn_a*100
+knn_a
+
+knn_e=mean_absolute_error(y_test, knn_pred_pak_r) knn_e
+
+RFReg=RandomForestRegressor(n_estimators=100,random_state=0) RFReg.fit(x_train,y_train)
+r_predict_pak_r=RFReg.predict(x_test)
+
+
+random_a=explained_variance_score(y_test,r_predict_pak_r) random_a=random_a*100
+random_a
+
+random_e=mean_absolute_error(y_test, r_predict_pak_r) random_e”
+
+
+“import matplotlib.pyplot as plt fig = plt.figure() fig.set_figheight(5) fig.set_figwidth(15)
+ax1= fig.add_subplot(121)
+ 
+
+ax2 = fig.add_subplot(122) ax1.set_title('Model Accuracy')
+algo = ['Linear', 'Polynomial', 'KNN', 'Random Forest'] accu = [linear_a,poly_a,knn_a,random_a]
+err = [linear_e,poly_e,knn_e,random_e] ax1.bar(algo,accu)
+ax1.set_title('Model Accuracy') ax2.set_title('Model Error')”
+
+“ax1.bar(algo,acu) ax2.bar(algo,err)” 
